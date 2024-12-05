@@ -27,6 +27,8 @@ use App\Http\Controllers\PublicationController as GuestPublicationController;
 use App\Http\Controllers\SocialServiceController as GuestSocialServiceController;
 use App\Http\Controllers\VinculationDocumentController as GuestVinculationDocumentController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\FormController;
+use App\Http\Controllers\PostController;
 use App\Models\Resource;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -75,9 +77,49 @@ Route::get('/download/files/{file}', [FileController::class, 'downloadPublicFile
 Route::get('/profile_images/{image}', [FileController::class, 'showProfileImage'])->name('profile-images.show');
 
 
-// routes/web.php
-Route::post('/register', [RecordController::class, 'store'])->name('register');
-Route::post('/register', [UserController::class, 'register'])->name('register');
+
+
+// Rutas POST únicas
+Route::post('/register-record', [RecordController::class, 'store'])->name('records.store');
+Route::post('/register-user', [UserController::class, 'register'])->name('user.register');
+
+// Rutas GET para mostrar formularios
+Route::get('/form/record-reime', [FormController::class, 'show'])->name('form.record-reime');
+Route::get('/form-record', [FormController::class, 'show'])->name('form.record');
+
+Route::get('/posts', [PostController::class, 'index']);
+Route::post('/posts', [PostController::class, 'store']);
+Route::put('/posts/{post}', [PostController::class, 'update']);
+
+Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+Route::post('/records', [RecordController::class, 'store'])->name('records.store');
+Route::get('/records', [RecordController::class, 'index']);
+
+// Ruta para mostrar todos los registros
+Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+
+// Ruta para crear un nuevo registro
+Route::get('/records/create', [RecordController::class, 'create'])->name('records.create');
+
+// Ruta para almacenar un nuevo registro
+Route::post('/records', [RecordController::class, 'store'])->name('records.store');
+
+// Ruta para mostrar un registro específico
+Route::get('/records/{id}', [RecordController::class, 'show'])->name('records.show');
+
+// Ruta para editar un registro
+Route::get('/records/{id}/edit', [RecordController::class, 'edit'])->name('records.edit');
+
+// Ruta para actualizar un registro específico
+Route::put('/records/{id}', [RecordController::class, 'update'])->name('records.update');
+
+// Ruta para eliminar un registro
+Route::delete('/records/{id}', [RecordController::class, 'destroy'])->name('records.destroy');
+
+Route::post('/records', [RecordController::class, 'store'])->name('records.store');
+Route::post('/records/carta-aceptacion', [RecordController::class, 'enviarCartaAceptacion'])->name('records.carta-aceptacion');
+
+
 
 Route::get('/dashboard', function () {
 	return Inertia::render('Dashboard');

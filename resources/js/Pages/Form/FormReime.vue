@@ -29,7 +29,6 @@ const form = useForm({
     contrasena: "",
 });
 
-const showSuccessMessage = ref(false);
 
 const isVisible = ref(false);
 
@@ -253,6 +252,5 @@ const submit = () => {
                 </button>
             </div>
         </form>
-        <SubmissionMessage v="showSuccessMessage" />
     </GuestLayout>
 </template>

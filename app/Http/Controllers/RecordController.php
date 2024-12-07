@@ -2,90 +2,43 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Record;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SolicitudEnviada;
-use App\Mail\CartaAceptacion;
+use Illuminate\Http\Request;
 
 class RecordController extends Controller
 {
-    /**
-     * Almacenar un nuevo registro en la base de datos.
-     */
     public function store(Request $request)
     {
         // Validar los datos del formulario
         $validated = $request->validate([
             'nombreCompleto' => 'required|string|max:255',
-            'edad' => 'required|integer',
-            'sexo' => 'required|in:masculino,femenino,otro',
+            'edad' => 'required|integer|min:0',
+            'sexo' => 'required|string',
             'gradoEstudios' => 'required|string|max:255',
             'institucion' => 'required|string|max:255',
             'departamento' => 'required|string|max:255',
             'direccionInstitucion' => 'required|string|max:255',
             'ciudad' => 'required|string|max:255',
             'estado' => 'required|string|max:255',
-            'tipoInstitucion' => 'required|in:publica,privada',
+            'tipoInstitucion' => 'required|string',
             'telefonoOficina' => 'required|string|max:20',
             'celular' => 'required|string|max:20',
-            'emailInstitucional' => 'required|email',
-            'emailPersonal' => 'required|email',
+            'emailInstitucional' => 'required|email|unique:records,emailInstitucional',
+            'emailPersonal' => 'nullable|email',
             'lineaInvestigacion' => 'required|string|max:255',
             'nivelEducativo' => 'required|string|max:255',
+            'usuario' => 'required|string|unique:records,usuario|max:255',
+            'correo' => 'required|email|unique:records,correo',
+            'contrasena' => 'required|string|min:8',
         ]);
 
-        // Enviar correo al administrador con los datos del formulario
-        Mail::to('caleth45yt@gmail.com')->send(new SolicitudEnviada($validated));
+        // Encriptar la contraseña antes de guardarla
+        $validated['contrasena'] = bcrypt($validated['contrasena']);
 
-        // Crear un nuevo registro con los datos validados
+        // Crear el registro
         Record::create($validated);
 
-        // Enviar la carta de aceptación al correo personal del usuario
-        Mail::to($validated['emailPersonal'])->send(new CartaAceptacion($validated));
-
-        // Retornar respuesta o redirección
-        return response()->json(['message' => 'Formulario enviado y registrado con éxito.'], 200);
-    }
-
-    /**
-     * Actualizar un registro específico en la base de datos.
-     */
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'nombreCompleto' => 'required|string|max:255',
-            'edad' => 'required|integer',
-            'sexo' => 'required|in:masculino,femenino,otro',
-            'gradoEstudios' => 'required|string|max:255',
-            'institucion' => 'required|string|max:255',
-            'departamento' => 'required|string|max:255',
-            'direccionInstitucion' => 'required|string|max:255',
-            'ciudad' => 'required|string|max:255',
-            'estado' => 'required|string|max:255',
-            'tipoInstitucion' => 'required|in:publica,privada',
-            'telefonoOficina' => 'required|string|max:20',
-            'celular' => 'required|string|max:20',
-            'emailInstitucional' => 'required|email',
-            'emailPersonal' => 'required|email',
-            'lineaInvestigacion' => 'required|string|max:255',
-            'nivelEducativo' => 'required|string|max:255',
-        ]);
-
-        $record = Record::findOrFail($id);
-        $record->update($validated);
-
-        return redirect()->route('records.index')->with('message', 'Registro actualizado con éxito.');
-    }
-
-    /**
-     * Eliminar un registro específico de la base de datos.
-     */
-    public function destroy($id)
-    {
-        $record = Record::findOrFail($id);
-        $record->delete();
-
-        return redirect()->route('records.index')->with('message', 'Registro eliminado con éxito.');
+        // Redirigir a la misma página con un mensaje de éxito y limpiar los campos del formulario
+        return redirect()->back()->with('message', 'Registro realizado con éxito.');
     }
 }
